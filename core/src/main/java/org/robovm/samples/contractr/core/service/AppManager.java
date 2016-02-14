@@ -10,16 +10,14 @@ import org.robovm.samples.contractr.core.common.RoboVMContext;
  */
 public class AppManager {
     final DatabaseHelper databaseHelper;
-    private final MBassador<Object> clientBus;
-    private final MBassador<Object> taskBus;
 
     public AppManager(RoboVMContext roboVMContext) {
-        this.clientBus = new MBassador<Object>(new BusConfiguration()
+        MBassador<Object> clientBus = new MBassador<Object>(new BusConfiguration()
                 .addFeature(Feature.SyncPubSub.Default())
                 .addFeature(Feature.AsynchronousHandlerInvocation.Default())
                 .addFeature(Feature.AsynchronousMessageDispatch.Default()));
 
-        this.taskBus = new MBassador<Object>(new BusConfiguration()
+        MBassador<Object> taskBus = new MBassador<Object>(new BusConfiguration()
                 .addFeature(Feature.SyncPubSub.Default())
                 .addFeature(Feature.AsynchronousHandlerInvocation.Default())
                 .addFeature(Feature.AsynchronousMessageDispatch.Default()));
