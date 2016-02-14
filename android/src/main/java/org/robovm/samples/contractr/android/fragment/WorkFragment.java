@@ -9,9 +9,8 @@ import android.widget.ToggleButton;
 import com.google.inject.Inject;
 import org.robovm.samples.contractr.android.R;
 import org.robovm.samples.contractr.android.adapter.TaskListAdapter;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Task;
 import roboguice.fragment.RoboFragment;
 import roboguice.inject.InjectView;
 
@@ -33,10 +32,9 @@ public class WorkFragment extends RoboFragment implements View.OnClickListener {
     TextView amountEarned;
 
     private boolean showing = false;
+
     @Inject
-    private TaskModel taskModel;
-    @Inject
-    private ClientModel clientModel;
+    private AppManager appManager;
 
     public static WorkFragment newInstance() {
         WorkFragment fragment = new WorkFragment();
@@ -80,9 +78,9 @@ public class WorkFragment extends RoboFragment implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        Task workingTask = taskModel.getWorkingTask();
+        Task workingTask = appManager.getDatabaseHelper().getWorkingTask();
         if (workingTask == null) {
-            final TaskListAdapter adapter = new TaskListAdapter(taskModel, clientModel, inflater, true);
+            final TaskListAdapter adapter = new TaskListAdapter(appManager, inflater, true);
             new AlertDialog.Builder(getActivity())
                     .setTitle("Select task:")
                     .setOnCancelListener(dialog -> updateUIComponents())
@@ -96,13 +94,13 @@ public class WorkFragment extends RoboFragment implements View.OnClickListener {
     }
 
     private void updateUIComponents() {
-        Task task = taskModel.getWorkingTask();
+        Task task = appManager.getDatabaseHelper().getWorkingTask();
         String currentTaskText;
         if (task == null) {
             currentTaskText = "None";
             startStopButton.setChecked(true);
         } else {
-            currentTaskText = task.getClient().getName() + " - " + task.getTitle();
+            currentTaskText = task.client.name + " - " + task.title;
             startStopButton.setChecked(false);
         }
         currentTaskLabel.setText(currentTaskText);
@@ -110,13 +108,13 @@ public class WorkFragment extends RoboFragment implements View.OnClickListener {
     }
 
     private void start(Task task) {
-        taskModel.startWork(task);
+        appManager.getDatabaseHelper().startWork(task);
         updateUIComponents();
         tick();
     }
 
     private void stop() {
-        taskModel.stopWork();
+        appManager.getDatabaseHelper().stopWork();
         updateUIComponents();
         tick(); // Resets timer to 00:00:00
     }
@@ -125,7 +123,7 @@ public class WorkFragment extends RoboFragment implements View.OnClickListener {
         if (!showing) {
             return;
         }
-        Task task = taskModel.getWorkingTask();
+        Task task = appManager.getDatabaseHelper().getWorkingTask();
         if (task != null) {
             timerLabel.setText(task.getTimeElapsed());
             amountEarned.setText(task.getAmountEarned(Locale.US));

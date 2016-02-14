@@ -9,12 +9,15 @@ import android.widget.Toast;
 import com.google.inject.Inject;
 import org.robovm.samples.contractr.android.R;
 import org.robovm.samples.contractr.android.adapter.ClientListAdapter;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+
+import java.sql.SQLException;
 
 public class ClientsFragment extends ListFragment {
     @Inject
-    private ClientModel clientModel;
+    private AppManager appManager;
 
     private ClientListAdapter mAdapter;
 
@@ -27,7 +30,7 @@ public class ClientsFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mAdapter = new ClientListAdapter(clientModel, inflater);
+        mAdapter = new ClientListAdapter(appManager, inflater);
         listView.setAdapter(mAdapter);
     }
 
@@ -50,17 +53,17 @@ public class ClientsFragment extends ListFragment {
     @Override
     protected void onEdit(int row) {
         EditClientFragment f = EditClientFragment.newInstance();
-        Client client = clientModel.get(row);
+        Client client = appManager.getDatabaseHelper().getClientAt(row);
         f.setClient(client);
         openDialog(f);
     }
 
     protected void onDelete(final int row) {
-        final Client client = clientModel.get(row);
+        final Client client = appManager.getDatabaseHelper().getClientAt(row);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setMessage("Are you sure you want to delete " + client.getName())
+                .setMessage("Are you sure you want to delete " + client.name)
                 .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-                    clientModel.delete(client);
+                    appManager.getDatabaseHelper().delete(client);
                     mAdapter.notifyDataSetChanged();
                     Toast.makeText(getActivity(), "Client deleted", Toast.LENGTH_SHORT).show();
                 })

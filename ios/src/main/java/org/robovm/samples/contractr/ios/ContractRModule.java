@@ -20,10 +20,7 @@ import dagger.Provides;
 import org.robovm.apple.foundation.Foundation;
 import org.robovm.samples.contractr.core.ClientModel;
 import org.robovm.samples.contractr.core.TaskModel;
-import org.robovm.samples.contractr.core.service.ClientManager;
 import org.robovm.samples.contractr.core.service.ConnectionPool;
-import org.robovm.samples.contractr.core.service.JdbcClientManager;
-import org.robovm.samples.contractr.core.service.JdbcTaskManager;
 import org.robovm.samples.contractr.core.service.SingletonConnectionPool;
 import org.robovm.samples.contractr.core.service.TaskManager;
 

@@ -8,16 +8,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import com.google.inject.Inject;
+import com.j256.ormlite.dao.Dao;
 import org.robovm.samples.contractr.android.R;
 import org.robovm.samples.contractr.android.adapter.ClientListAdapter;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+import org.robovm.samples.contractr.core.service.Task;
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
+import java.sql.SQLException;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class AbstractTaskFragment extends RoboDialogFragment implements AdapterView.OnItemSelectedListener {
@@ -37,9 +40,7 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
     Button cancelButton;
 
     @Inject
-    TaskModel taskModel;
-    @Inject
-    ClientModel clientModel;
+    AppManager appManager;
 
     protected Task task;
     protected Client client;
@@ -73,7 +74,7 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mAdapter = new ClientListAdapter(clientModel, inflater);
+        mAdapter = new ClientListAdapter(appManager, inflater);
         clientPicker.setAdapter(mAdapter);
         clientPicker.setOnItemSelectedListener(this);
         okButton.setOnClickListener(v -> onSave());
@@ -93,7 +94,7 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        client = clientModel.get(position);
+        client =  appManager.getDatabaseHelper().getClientAt(position);
     }
 
     @Override
@@ -114,11 +115,14 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
     }
 
     protected void updateViewValuesWithTask(Task task) {
-        client = task == null ? null : task.getClient();
+        client = task == null ? null : task.client;
         int selectedRow = 0;
         if (client != null) {
-            for (int i = 0; i < clientModel.count(); i++) {
-                if (clientModel.get(i).equals(client)) {
+            List<Client> clients = appManager.getDatabaseHelper().getAllClients();
+
+            long clientCount = clients.size();
+            for (int i = 0; i < clientCount; i++) {
+                if (clients.get(i).equals(client)) {
                     selectedRow = i;
                     break;
                 }
@@ -126,9 +130,9 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
         }
         clientPicker.setSelection(selectedRow);
         //clientTextField.setText(task == null ? "" : task.getClient().getName());
-        titleTextField.setText(task == null ? "" : task.getTitle());
-        notesTextField.setText(task == null ? "" : task.getNotes());
-        finishedToggle.setChecked(task != null && task.isFinished());
+        titleTextField.setText(task == null ? "" : task.title);
+        notesTextField.setText(task == null ? "" : task.notes);
+        finishedToggle.setChecked(task != null && task.finished);
         updateSaveButtonEnabled();
     }
 
@@ -138,11 +142,11 @@ public abstract class AbstractTaskFragment extends RoboDialogFragment implements
         String notes = notesTextField.getText().toString();
         notes = notes == null ? "" : notes.trim();
 
-        Client client = clientModel.get(clientPicker.getSelectedItemPosition());
-        task.setClient(client);
-        task.setTitle(title);
-        task.setNotes(notes);
-        task.setFinished(finishedToggle.isChecked());
+        Client client = appManager.getDatabaseHelper().getClientAt(clientPicker.getSelectedItemPosition());
+        task.client = (client);
+        task.title = (title);
+        task.notes = (notes);
+        task.finished = (finishedToggle.isChecked());
 
         return task;
     }

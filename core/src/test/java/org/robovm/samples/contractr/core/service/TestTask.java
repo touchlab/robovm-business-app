@@ -19,7 +19,6 @@ import java.util.Date;
 
 import org.robovm.samples.contractr.core.Client;
 import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.service.TaskImpl;
 
 /**
  * Test {@link Task} implementation.

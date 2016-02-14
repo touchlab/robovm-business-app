@@ -23,10 +23,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.robovm.samples.contractr.core.Client;
 import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.service.ConnectionPool;
-import org.robovm.samples.contractr.core.service.JdbcClientManager;
-import org.robovm.samples.contractr.core.service.JdbcTaskManager;
-import org.robovm.samples.contractr.core.service.SingletonConnectionPool;
 
 /**
  * Tests {@link JdbcClientManager}.

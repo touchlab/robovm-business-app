@@ -11,8 +11,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import com.google.inject.Inject;
 import org.robovm.samples.contractr.android.R;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
 import roboguice.fragment.RoboDialogFragment;
 import roboguice.inject.InjectView;
 
@@ -32,7 +32,7 @@ public abstract class AbstractClientFragment extends RoboDialogFragment {
     Button cancelButton;
 
     @Inject
-    ClientModel clientModel;
+    AppManager appManager;
     Client client;
     NumberFormat formatter = NumberFormat.getIntegerInstance(Locale.ENGLISH);
 
@@ -89,8 +89,8 @@ public abstract class AbstractClientFragment extends RoboDialogFragment {
     }
 
     protected void updateViewValuesWithClient(Client client) {
-        nameTextField.setText(client == null ? "" : client.getName());
-        hourlyRateTextField.setText(formatter.format(client == null ? BigDecimal.ZERO : client.getHourlyRate()));
+        nameTextField.setText(client == null ? "" : client.name);
+        hourlyRateTextField.setText(formatter.format(client == null ? BigDecimal.ZERO : client.hourlyRate));
         updateSaveButtonEnabled();
     }
 
@@ -98,10 +98,10 @@ public abstract class AbstractClientFragment extends RoboDialogFragment {
         String name = nameTextField.getText().toString();
         name = name == null ? "" : name.trim();
 
-        client.setName(name);
+        client.name = name;
         try {
-            client.setHourlyRate(
-                    BigDecimal.valueOf(formatter.parse(hourlyRateTextField.getText().toString()).doubleValue()));
+            client.hourlyRate =
+                    BigDecimal.valueOf(formatter.parse(hourlyRateTextField.getText().toString()).doubleValue());
         } catch (ParseException e) {
             e.printStackTrace();
         }

@@ -1,6 +1,9 @@
 package org.robovm.samples.contractr.android.fragment;
 
 import android.app.Fragment;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+
+import java.sql.SQLException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,7 +27,7 @@ public class EditClientFragment extends AbstractClientFragment {
 
     @Override
     protected void onSave() {
-        clientModel.save(saveViewValuesToClient(client));
+        appManager.getDatabaseHelper().saveClient(saveViewValuesToClient(client));
         super.onSave();
     }
 }

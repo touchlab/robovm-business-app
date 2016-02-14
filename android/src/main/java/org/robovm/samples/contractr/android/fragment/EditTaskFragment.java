@@ -1,5 +1,9 @@
 package org.robovm.samples.contractr.android.fragment;
 
+import org.robovm.samples.contractr.core.common.SQLiteException;
+
+import java.sql.SQLException;
+
 public class EditTaskFragment extends AbstractTaskFragment {
 
     public static EditTaskFragment newInstance() {
@@ -21,7 +25,7 @@ public class EditTaskFragment extends AbstractTaskFragment {
 
     @Override
     protected void onSave() {
-        taskModel.save(saveViewValuesToTask(task));
+        appManager.getDatabaseHelper().saveTask(saveViewValuesToTask(task));
         super.onSave();
     }
 }

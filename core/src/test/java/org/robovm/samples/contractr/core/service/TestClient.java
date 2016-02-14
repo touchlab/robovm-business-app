@@ -18,7 +18,6 @@ package org.robovm.samples.contractr.core.service;
 import java.math.BigDecimal;
 
 import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.service.ClientImpl;
 
 /**
  * Test {@link Client} implementation.

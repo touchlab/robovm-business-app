@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.service.ClientManager;
 
 /**
  * Test {@link ClientManager} implementation.

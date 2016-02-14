@@ -1,8 +1,8 @@
 package org.robovm.samples.contractr.android.fragment;
 
 import android.app.Fragment;
+import org.robovm.samples.contractr.core.service.Client;
 
-import org.robovm.samples.contractr.core.Client;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -24,8 +24,8 @@ public class AddClientFragment extends AbstractClientFragment {
 
     @Override
     protected void onSave() {
-        Client client = saveViewValuesToClient(clientModel.create());
-        clientModel.save(client);
+        Client client = saveViewValuesToClient(new Client());
+        appManager.getDatabaseHelper().saveClient(client);
         super.onSave();
     }
 }

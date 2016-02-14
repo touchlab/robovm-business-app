@@ -11,15 +11,15 @@ import com.google.inject.Inject;
 import org.robovm.samples.contractr.android.R;
 import org.robovm.samples.contractr.android.adapter.TaskListAdapter;
 
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Task;
+
+import java.sql.SQLException;
 
 public class TasksFragment extends ListFragment {
     @Inject
-    TaskModel taskModel;
-    @Inject
-    ClientModel clientModel;
+    AppManager appManager;
 
     private TaskListAdapter adapter;
 
@@ -46,9 +46,9 @@ public class TasksFragment extends ListFragment {
     protected void onDelete(final int row) {
         final Task task = (Task) adapter.getItem(row);
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
-                .setMessage("Are you sure you want to delete " + task.getTitle() + "?")
+                .setMessage("Are you sure you want to delete " + task.title + "?")
                 .setPositiveButton(android.R.string.ok, (dialog, id) -> {
-                    taskModel.delete(task);
+                    appManager.getDatabaseHelper().delete(task);
                     adapter.notifyDataSetChanged();
                     Toast.makeText(getActivity(), "Task deleted", Toast.LENGTH_SHORT);
                 })
@@ -68,7 +68,7 @@ public class TasksFragment extends ListFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        adapter = new TaskListAdapter(taskModel, clientModel, inflater, false);
+        adapter = new TaskListAdapter(appManager, inflater, false);
         listView.setAdapter(adapter);
     }
 

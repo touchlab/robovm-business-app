@@ -6,30 +6,29 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import org.robovm.samples.contractr.android.R;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+import org.robovm.samples.contractr.core.service.Task;
 
+import java.sql.SQLException;
 import java.util.List;
 
 public class TaskListAdapter extends BaseAdapter {
-    private TaskModel taskModel;
-    private ClientModel clientModel;
+    private AppManager appManager;
     private LayoutInflater inflater;
     private boolean unfinishedOnly;
 
-    public TaskListAdapter(TaskModel taskModel, ClientModel clientModel, LayoutInflater inflater,
+    public TaskListAdapter(AppManager appManager, LayoutInflater inflater,
             boolean unfinishedOnly) {
-        this.taskModel = taskModel;
-        this.clientModel = clientModel;
+        this.appManager = appManager;
         this.inflater = inflater;
         this.unfinishedOnly = unfinishedOnly;
     }
 
     @Override
     public int getCount() {
-        return taskModel.countUnfinished() + clientModel.count();
+        return appManager.getDatabaseHelper().getTaskCountUnfinished() + appManager.getDatabaseHelper().getClientCount();
     }
 
     @Override
@@ -51,7 +50,7 @@ public class TaskListAdapter extends BaseAdapter {
 
         TextView text = (TextView) view.findViewById(R.id.taskTitle);
         TextView timeWorked = (TextView) view.findViewById(R.id.timeElapsed);
-        text.setText(t.getTitle());
+        text.setText(t.title);
         timeWorked.setText(t.getTimeElapsed());
 
         return view;
@@ -64,15 +63,15 @@ public class TaskListAdapter extends BaseAdapter {
             view.setTag("client");
         }
         TextView clientName = (TextView) view.findViewById(R.id.clientName);
-        clientName.setText(c.getName());
+        clientName.setText(c.name);
         return view;
     }
 
     public Object getItem(int position) {
         int rowNr = 0;
-        for (int i = 0; i < clientModel.count(); i++) {
-            Client c = clientModel.get(i);
-            List<Task> tasks = taskModel.getForClient(c, false);
+        List<Client> clients = appManager.getDatabaseHelper().getAllClients();
+        for (Client c : clients) {
+            List<Task> tasks = appManager.getDatabaseHelper().getTasksForClient(c);
             if (position <= rowNr + tasks.size()) {
                 if (position - rowNr == 0) {
                     return c;

@@ -1,6 +1,6 @@
 package org.robovm.samples.contractr.android.fragment;
 
-import org.robovm.samples.contractr.core.Task;
+import org.robovm.samples.contractr.core.service.Task;
 
 public class AddTaskFragment extends AbstractTaskFragment {
     public static AddTaskFragment newInstance() {
@@ -16,8 +16,8 @@ public class AddTaskFragment extends AbstractTaskFragment {
 
     @Override
     protected void onSave() {
-        Task task = saveViewValuesToTask(taskModel.create(client));
-        taskModel.save(task);
+        Task task = saveViewValuesToTask(new Task());
+        appManager.getDatabaseHelper().saveTask(task);
         super.onSave();
     }
 }

@@ -6,21 +6,24 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.common.SQLiteException;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+
+import java.sql.SQLException;
 
 public class ClientListAdapter extends BaseAdapter {
-    ClientModel clientModel;
+    AppManager appManager;
     LayoutInflater inflater;
 
-    public ClientListAdapter(ClientModel clientModel, LayoutInflater inflater) {
-        this.clientModel = clientModel;
+    public ClientListAdapter(AppManager appManager, LayoutInflater inflater) {
+        this.appManager = appManager;
         this.inflater = inflater;
     }
 
     @Override
     public int getCount() {
-        return clientModel.count();
+        return appManager.getDatabaseHelper().getClientCount();
     }
 
     @Override
@@ -30,9 +33,9 @@ public class ClientListAdapter extends BaseAdapter {
             view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
         }
 
-        Client c = clientModel.get(position);
+        Client c = appManager.getDatabaseHelper().getClientAt(position);
         TextView text = (TextView) view.findViewById(android.R.id.text1);
-        text.setText(c.getName());
+        text.setText(c.name);
 
         return view;
 
@@ -40,7 +43,7 @@ public class ClientListAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        return clientModel.get(position);
+        return appManager.getDatabaseHelper().getClientAt(position);
     }
 
     @Override
