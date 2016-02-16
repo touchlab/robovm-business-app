@@ -254,9 +254,19 @@ public class DatabaseHelper extends OrmliteOpenHelper {
     public void selectClient(Client newClient) {
         Client oldClient = this.selectedClient;
         this.selectedClient = newClient;
-        if (!oldClient.id.equals(newClient.id)) {
+        if (oldClient != null && !oldClient.id.equals(newClient.id)) {
             clientBus.publish(new SelectedClientChangedEvent(oldClient, newClient));
         }
+    }
+
+    public Client getSelectedClient()
+    {
+        return selectedClient;
+    }
+
+    public Task getSelectedTask()
+    {
+        return selectedTask;
     }
 
     @Handler
@@ -267,7 +277,7 @@ public class DatabaseHelper extends OrmliteOpenHelper {
     public void selectTask(Task newTask) {
         Task oldTask = this.selectedTask;
         this.selectedTask = newTask;
-        if (!oldTask.id.equals(newTask.id)) {
+        if (oldTask != null && !oldTask.id.equals(newTask.id)) {
             taskBus.publish(new SelectedTaskChangedEvent(oldTask, newTask));
         }
     }

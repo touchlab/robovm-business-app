@@ -15,7 +15,9 @@
  */
 package org.robovm.samples.contractr.ios.views;
 
-import org.robovm.apple.coregraphics.*;
+import org.robovm.apple.coregraphics.CGContext;
+import org.robovm.apple.coregraphics.CGPoint;
+import org.robovm.apple.coregraphics.CGRect;
 import org.robovm.apple.foundation.NSCoder;
 import org.robovm.apple.uikit.UIBezierPath;
 import org.robovm.apple.uikit.UIColor;

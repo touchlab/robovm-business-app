@@ -25,10 +25,9 @@ import org.robovm.apple.uikit.UITextField;
 import org.robovm.objc.annotation.CustomClass;
 import org.robovm.objc.annotation.IBAction;
 import org.robovm.objc.annotation.IBOutlet;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+import org.robovm.samples.contractr.core.service.Task;
 
 import javax.inject.Inject;
 
@@ -42,8 +41,8 @@ public class EditTaskViewController extends InjectedTableViewController {
 
     private boolean clientPickerShowing = false;
 
-    @Inject ClientModel clientModel;
-    @Inject TaskModel taskModel;
+    @Inject
+    AppManager appManager;
 
     @IBOutlet UIPickerView clientPicker;
     @IBOutlet UITextField clientTextField;
@@ -62,21 +61,21 @@ public class EditTaskViewController extends InjectedTableViewController {
             }
             @Override
             public long getNumberOfRows(UIPickerView pickerView, long component) {
-                return clientModel.count() + 1;
+                return appManager.getDatabaseHelper().getClientCount() + 1;
             }
         });
         clientPicker.setDelegate(new UIPickerViewDelegateAdapter() {
             @Override
             public String getRowTitle(UIPickerView pickerView, long row,
                                       long component) {
-                return row == 0 ? "" : clientModel.get((int) row - 1).getName();
+                return row == 0 ? "" : appManager.getDatabaseHelper().getClientAt((int) row - 1).name;
             }
 
             @Override
             public void didSelectRow(UIPickerView pickerView, long row, long component) {
                 Client client = getSelectedClient();
                 if (client != null) {
-                    clientTextField.setText(client.getName());
+                    clientTextField.setText(client.name);
                 } else {
                     clientTextField.setText("");
                 }
@@ -92,7 +91,7 @@ public class EditTaskViewController extends InjectedTableViewController {
 
         showHideClientPicker(false);
 
-        Task task = taskModel.getSelectedTask();
+        Task task = appManager.getDatabaseHelper().getSelectedTask();
         if (task == null) {
             getNavigationItem().setTitle("Add task");
         } else {
@@ -103,12 +102,14 @@ public class EditTaskViewController extends InjectedTableViewController {
 
     @IBAction
     private void save() {
-        Task task = taskModel.getSelectedTask();
+        Task task = appManager.getDatabaseHelper().getSelectedTask();
         if (task == null) {
             Client client = getSelectedClient();
-            taskModel.save(saveViewValuesToTask(taskModel.create(client)));
+            Task t = new Task();
+            t.client = client;
+            appManager.getDatabaseHelper().saveTask(saveViewValuesToTask(t));
         } else {
-            taskModel.save(saveViewValuesToTask(task));
+            appManager.getDatabaseHelper().saveTask(saveViewValuesToTask(task));
         }
         getNavigationController().popViewController(true);
     }
@@ -117,7 +118,7 @@ public class EditTaskViewController extends InjectedTableViewController {
         if (clientPicker.getSelectedRow(0) == 0) {
             return null;
         }
-        return clientModel.get((int) clientPicker.getSelectedRow(0) - 1);
+        return appManager.getDatabaseHelper().getClientAt((int) clientPicker.getSelectedRow(0) - 1);
     }
 
     @IBAction
@@ -145,21 +146,22 @@ public class EditTaskViewController extends InjectedTableViewController {
     }
 
     protected void updateViewValuesWithTask(Task task) {
-        Client client = task == null ? null : task.getClient();
+        Client client = task == null ? null : task.client;
         int selectedRow = 0;
         if (client != null) {
-            for (int i = 0; i < clientModel.count(); i++) {
-                if (clientModel.get(i).equals(client)) {
+            int clientCount = appManager.getDatabaseHelper().getClientCount();
+            for (int i = 0; i < clientCount; i++) {
+                if (appManager.getDatabaseHelper().getClientAt(i).equals(client)) {
                     selectedRow = i + 1;
                     break;
                 }
             }
         }
         clientPicker.selectRow(selectedRow, 0, false);
-        clientTextField.setText(task == null ? "" : task.getClient().getName());
-        titleTextField.setText(task == null ? "" : task.getTitle());
-        notesTextField.setText(task == null ? "" : task.getNotes());
-        finishedSwitch.setOn(task == null ? false : task.isFinished());
+        clientTextField.setText(task == null ? "" : task.client.name);
+        titleTextField.setText(task == null ? "" : task.title);
+        notesTextField.setText(task == null ? "" : task.notes);
+        finishedSwitch.setOn(task == null ? false : task.finished);
         updateSaveButtonEnabled();
     }
 
@@ -170,10 +172,10 @@ public class EditTaskViewController extends InjectedTableViewController {
         notes = notes == null ? "" : notes.trim();
 
         Client client = getSelectedClient();
-        task.setClient(client);
-        task.setTitle(title);
-        task.setNotes(notes);
-        task.setFinished(finishedSwitch.isOn());
+        task.client = (client);
+        task.title = (title);
+        task.notes = (notes);
+        task.finished = (finishedSwitch.isOn());
 
         return task;
     }

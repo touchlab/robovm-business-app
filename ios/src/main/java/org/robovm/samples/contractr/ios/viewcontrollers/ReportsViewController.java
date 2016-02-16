@@ -17,28 +17,43 @@ package org.robovm.samples.contractr.ios.viewcontrollers;
 
 import org.robovm.apple.dispatch.DispatchQueue;
 import org.robovm.apple.foundation.NSIndexPath;
-import org.robovm.apple.uikit.*;
+import org.robovm.apple.uikit.UIColor;
+import org.robovm.apple.uikit.UILabel;
+import org.robovm.apple.uikit.UISegmentedControl;
+import org.robovm.apple.uikit.UITableView;
+import org.robovm.apple.uikit.UITableViewCell;
+import org.robovm.apple.uikit.UITableViewDataSourceAdapter;
+import org.robovm.apple.uikit.UIView;
 import org.robovm.objc.annotation.CustomClass;
 import org.robovm.objc.annotation.IBAction;
 import org.robovm.objc.annotation.IBOutlet;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
 import org.robovm.samples.contractr.ios.IOSColors;
 import org.robovm.samples.contractr.ios.views.PieChartView;
 import org.robovm.samples.contractr.ios.views.PieChartView.Component;
 
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 @CustomClass("ReportsViewController")
 public class ReportsViewController extends InjectedViewController {
-    @Inject ClientModel clientModel;
-    @IBOutlet PieChartView pieChart;
-    @IBOutlet UITableView clientsTableView;
-    @IBOutlet UISegmentedControl typeSegmentedControl;
+    @Inject
+    AppManager         appManager;
+
+    @IBOutlet
+    PieChartView       pieChart;
+
+    @IBOutlet
+    UITableView        clientsTableView;
+
+    @IBOutlet
+    UISegmentedControl typeSegmentedControl;
+
     private boolean showing = true;
 
     @CustomClass("ReportsClientCell")
@@ -57,14 +72,14 @@ public class ReportsViewController extends InjectedViewController {
             public UITableViewCell getCellForRow(UITableView tableView, NSIndexPath indexPath) {
                 boolean showAmount = typeSegmentedControl.getSelectedSegment() == 0;
                 ReportsClientCell cell = (ReportsClientCell) tableView.dequeueReusableCell("cell");
-                Client client = clientModel.get(indexPath.getRow());
-                cell.colorView.setBackgroundColor(IOSColors.getClientColor(clientModel.indexOf(client)));
-                cell.nameLabel.setText(client.getName());
-                if (showAmount) {
-                    cell.valueLabel.setText(clientModel.getTotalAmountEarned(client, Locale.US));
+                Client client = appManager.getDatabaseHelper().getClientAt(indexPath.getRow());
+                cell.colorView.setBackgroundColor(IOSColors.getClientColor(0));
+                cell.nameLabel.setText(client.name);
+                /*if (showAmount) {
+                    cell.valueLabel.setText(appManager.getDatabaseHelper().gT clientModel.getTotalAmountEarned(client, Locale.US));
                 } else {
-                    cell.valueLabel.setText(clientModel.getTotalTimeElapsed(client));
-                }
+                    cell.valueLabel.setText(appManager.getDatabaseHelper().clientModel.getTotalTimeElapsed(client));
+                }*/
                 return cell;
             }
 
@@ -75,7 +90,7 @@ public class ReportsViewController extends InjectedViewController {
 
             @Override
             public long getNumberOfRowsInSection(UITableView tableView, long section) {
-                return clientModel.count();
+                return appManager.getDatabaseHelper().getClientCount();
             }
         });
     }
@@ -111,16 +126,17 @@ public class ReportsViewController extends InjectedViewController {
         boolean showAmount = typeSegmentedControl.getSelectedSegment() == 0;
 
         List<Component> components = new ArrayList<>();
-        for (int i = 0; i < clientModel.count(); i++) {
-            Client client = clientModel.get(i);
+        int clientCount = appManager.getDatabaseHelper().getClientCount();
+        for (int i = 0; i < clientCount; i++) {
+            Client client = appManager.getDatabaseHelper().getClientAt(i);
             UIColor color = IOSColors.getClientColor(i);
-            if (showAmount) {
+            /*if (showAmount) {
                 components.add(new Component(color,
                         clientModel.getTotalAmountEarned(client).doubleValue()));
             } else {
                 components.add(new Component(color,
                         clientModel.getTotalSecondsElapsed(client)));
-            }
+            }*/
         }
         pieChart.setComponents(components);
     }

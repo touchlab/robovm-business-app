@@ -123,8 +123,8 @@ public class SQLDroidJdbcDatabaseConnection implements DatabaseConnection {
             if (resultFlags == DatabaseConnection.DEFAULT_RESULT_FLAGS) {
                 resultFlags = ResultSet.TYPE_FORWARD_ONLY;
             }
-            JdbcCompiledStatement compiledStatement =
-                    new JdbcCompiledStatement(connection.prepareStatement(statement, resultFlags,
+            SqliteJdbcCompiledStatement compiledStatement =
+                    new SqliteJdbcCompiledStatement(connection.prepareStatement(statement, resultFlags,
                             ResultSet.CONCUR_READ_ONLY), type);
             logger.trace("compiled statement: {}", statement);
             return compiledStatement;
@@ -269,7 +269,7 @@ public class SQLDroidJdbcDatabaseConnection implements DatabaseConnection {
                     connection.prepareStatement(statement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             try {
                 statementSetArgs(stmt, args, argFieldTypes);
-                DatabaseResults results = new JdbcDatabaseResults(stmt, stmt.executeQuery(), objectCache);
+                DatabaseResults results = new SqliteJdbcDatabaseResults(stmt, stmt.executeQuery(), objectCache);
                 logger.trace("{} statement is prepared and executed: {}", label, statement);
                 if (!results.first()) {
                     // no results at all
@@ -340,7 +340,7 @@ public class SQLDroidJdbcDatabaseConnection implements DatabaseConnection {
                             stmt.setBytes(i + 1, (byte[]) arg);
                             break;
                         case DATE :
-                            stmt.setDate(i + 1, (Date)arg);
+                            // this is mapped to a STRING under Android
                         case BLOB :
                             // this is only for derby serializable
                         case BIG_DECIMAL :

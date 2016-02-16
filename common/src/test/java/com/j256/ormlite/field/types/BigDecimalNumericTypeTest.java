@@ -17,6 +17,7 @@ import com.j256.ormlite.table.DatabaseTable;
 
 public class BigDecimalNumericTypeTest extends BaseTypeTest {
 
+	/*//Not supported on Android/RoboVM
 	private final static String BIGDECIMAL_COLUMN = "bigDecimal";
 
 	@Test
@@ -80,5 +81,5 @@ public class BigDecimalNumericTypeTest extends BaseTypeTest {
 	protected static class NotBigDecimalNumeric {
 		@DatabaseField(columnName = BIGDECIMAL_COLUMN, dataType = DataType.BIG_DECIMAL_NUMERIC)
 		String bigDecimal;
-	}
+	}*/
 }

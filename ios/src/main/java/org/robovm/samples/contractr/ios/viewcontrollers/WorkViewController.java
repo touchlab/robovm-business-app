@@ -16,30 +16,32 @@
 package org.robovm.samples.contractr.ios.viewcontrollers;
 
 import net.engio.mbassy.listener.Handler;
-import org.robovm.apple.coreanimation.CALayer;
+
 import org.robovm.apple.dispatch.DispatchQueue;
-import org.robovm.apple.uikit.*;
+import org.robovm.apple.uikit.UIButton;
+import org.robovm.apple.uikit.UIColor;
+import org.robovm.apple.uikit.UIControlState;
+import org.robovm.apple.uikit.UILabel;
+import org.robovm.apple.uikit.UIView;
 import org.robovm.objc.annotation.CustomClass;
 import org.robovm.objc.annotation.IBAction;
 import org.robovm.objc.annotation.IBOutlet;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
-import org.robovm.samples.contractr.core.TaskModel.WorkStartedEvent;
-import org.robovm.samples.contractr.core.TaskModel.WorkStoppedEvent;
-import org.robovm.samples.contractr.ios.ContractRApp;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.DatabaseHelper;
+import org.robovm.samples.contractr.core.service.Task;
 import org.robovm.samples.contractr.ios.IOSColors;
 
-import javax.inject.Inject;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 @CustomClass("WorkViewController")
 public class WorkViewController extends InjectedViewController {
 
-    @Inject ClientModel clientModel;
-    @Inject TaskModel taskModel;
+    @Inject
+           AppManager appManager;
 
     @IBOutlet UIButton startStopButton;
     @IBOutlet UILabel currentClientLabel;
@@ -50,12 +52,12 @@ public class WorkViewController extends InjectedViewController {
     private boolean showing = true;
 
     @Handler
-    public void workStarted(WorkStartedEvent event) {
+    public void workStarted(DatabaseHelper.WorkStartedEvent event) {
         DispatchQueue.getMainQueue().async(this::updateUIComponents);
     }
 
     @Handler
-    public void workStopped(WorkStoppedEvent event) {
+    public void workStopped(DatabaseHelper.WorkStoppedEvent event) {
         DispatchQueue.getMainQueue().async(() -> {
             updateUIComponents();
             tick(); // Resets timer to 00:00:00
@@ -65,7 +67,7 @@ public class WorkViewController extends InjectedViewController {
     @Override
     public void viewWillAppear(boolean animated) {
         super.viewWillAppear(animated);
-        taskModel.subscribe(this);
+        appManager.getDatabaseHelper().subscribeTask(this);
         showing = true;
         updateUIComponents();
         tick();
@@ -73,22 +75,22 @@ public class WorkViewController extends InjectedViewController {
 
     @Override
     public void viewWillDisappear(boolean animated) {
-        taskModel.unsubscribe(this);
+        appManager.getDatabaseHelper().unsubscribeTask(this);
         showing = false;
         super.viewWillDisappear(animated);
     }
 
     @IBAction void startStopClicked() {
-        Task workingTask = taskModel.getWorkingTask();
+        Task workingTask = appManager.getDatabaseHelper().getWorkingTask();
         if (workingTask == null) {
             performSegue("selectTaskSegue", this);
         } else {
-            taskModel.stopWork();
+            appManager.getDatabaseHelper().stopWork();
         }
     }
 
     private void updateUIComponents() {
-        Task task = taskModel.getWorkingTask();
+        Task task = appManager.getDatabaseHelper().getWorkingTask();
         UIColor startStopColor = null;
         String startStopTitle = null;
         String currentTaskText = null;
@@ -101,11 +103,12 @@ public class WorkViewController extends InjectedViewController {
         } else {
             startStopTitle = "Stop work";
             startStopColor = IOSColors.STOP_WORK;
-            currentTaskText = task.getTitle();
-            currentClientLabel.setText(task.getClient().getName());
+            currentTaskText = task.title;
+            currentClientLabel.setText(task.client.name);
             currentClientLabel.setHidden(false);
+            //TODO: client index needed
             currentClientColorView.setBackgroundColor(
-                    IOSColors.getClientColor(clientModel.indexOf(task.getClient())));
+                    IOSColors.getClientColor(0));
             currentClientColorView.setHidden(false);
         }
         startStopButton.setTitle(startStopTitle, UIControlState.Normal);
@@ -117,7 +120,7 @@ public class WorkViewController extends InjectedViewController {
         if (!showing) {
             return;
         }
-        Task task = taskModel.getWorkingTask();
+        Task task = appManager.getDatabaseHelper().getWorkingTask();
         if (task != null) {
             timerLabel.setText(task.getTimeElapsed());
             earnedLabel.setText(task.getAmountEarned(Locale.US));

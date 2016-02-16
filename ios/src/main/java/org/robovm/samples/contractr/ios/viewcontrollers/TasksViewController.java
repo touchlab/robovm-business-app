@@ -27,10 +27,9 @@ import org.robovm.apple.uikit.UITableViewCellAccessoryType;
 import org.robovm.apple.uikit.UITableViewCellStyle;
 import org.robovm.apple.uikit.UITableViewRowAnimation;
 import org.robovm.objc.annotation.CustomClass;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+import org.robovm.samples.contractr.core.service.Task;
 
 import javax.inject.Inject;
 
@@ -47,8 +46,8 @@ public class TasksViewController extends ListViewController {
         strikeThroughAttrs.setStrikethroughStyle(NSUnderlineStyle.StyleSingle);
     }
 
-    @Inject ClientModel clientModel;
-    @Inject TaskModel taskModel;
+    @Inject
+           AppManager appManager;
 
     @Override
     public void viewDidLoad() {
@@ -59,25 +58,25 @@ public class TasksViewController extends ListViewController {
 
     @Override
     protected void onAdd() {
-        clientModel.selectClient(null);
-        taskModel.selectTask(null);
+        appManager.getDatabaseHelper().selectClient(null);
+        appManager.getDatabaseHelper().selectTask(null);
         performSegue("editTaskSegue", this);
     }
 
     @Override
     protected void onEdit(int section, int row) {
-        Client client = clientModel.get(section);
-        Task task = taskModel.getForClient(client, false).get(row);
-        clientModel.selectClient(client);
-        taskModel.selectTask(task);
+        Client client = appManager.getDatabaseHelper().getClientAt(section);
+        Task task = appManager.getDatabaseHelper().getTasksForClient(client).get(row);
+        appManager.getDatabaseHelper().selectClient(client);
+        appManager.getDatabaseHelper().selectTask(task);
         performSegue("editTaskSegue", this);
     }
 
     @Override
     protected void onDelete(int section, int row) {
-        Client client = clientModel.get(section);
-        Task task = taskModel.getForClient(client, false).get(row);
-        taskModel.delete(task);
+        Client client = appManager.getDatabaseHelper().getClientAt(section);
+        Task task = appManager.getDatabaseHelper().getTasksForClient(client).get(row);
+        appManager.getDatabaseHelper().delete(task);
         getTableView().deleteRows(
                 new NSArray<>(NSIndexPathExtensions.createIndexPathForRowInSection(row, section)),
                 UITableViewRowAnimation.Automatic);
@@ -90,33 +89,33 @@ public class TasksViewController extends ListViewController {
             cell = new UITableViewCell(UITableViewCellStyle.Value1, "cell");
             cell.setAccessoryType(UITableViewCellAccessoryType.DisclosureIndicator);
         }
-        Client client = clientModel.get(indexPath.getSection());
-        Task task = taskModel.getForClient(client, false).get(indexPath.getRow());
-        String title = task.getTitle();
-        if (task.isFinished()) {
+        Client client = appManager.getDatabaseHelper().getClientAt(indexPath.getSection());
+        Task task = appManager.getDatabaseHelper().getTasksForClient(client).get(indexPath.getRow());
+        String title = task.title;
+        if (task.finished) {
             NSAttributedString attributedTitle = new NSAttributedString(title, strikeThroughAttrs);
             cell.getTextLabel().setAttributedText(attributedTitle);
         } else {
             cell.getTextLabel().setText(title);
         }
-        cell.getDetailTextLabel().setText(task.getNotes());
+        cell.getDetailTextLabel().setText(task.notes);
         return cell;
     }
 
     @Override
     public String getTitleForHeader(UITableView tableView, long section) {
-        Client client = clientModel.get((int) section);
-        return client.getName();
+        Client client = appManager.getDatabaseHelper().getClientAt((int) section);
+        return client.name;
     }
 
     @Override
     public long getNumberOfSections(UITableView tableView) {
-        return clientModel.count();
+        return appManager.getDatabaseHelper().getClientCount();
     }
 
     @Override
     public long getNumberOfRowsInSection(UITableView tableView, long section) {
-        Client client = clientModel.get((int) section);
-        return taskModel.getForClient(client, false).size();
+        Client client = appManager.getDatabaseHelper().getClientAt((int) section);
+        return appManager.getDatabaseHelper().getTasksForClient(client).size();
     }
 }

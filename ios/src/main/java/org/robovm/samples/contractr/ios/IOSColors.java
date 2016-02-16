@@ -15,13 +15,8 @@
  */
 package org.robovm.samples.contractr.ios;
 
-import dagger.Component;
 import org.robovm.apple.uikit.UIColor;
 import org.robovm.samples.contractr.core.ui.Colors;
-import org.robovm.samples.contractr.ios.viewcontrollers.*;
-
-import javax.inject.Singleton;
-import java.lang.reflect.Method;
 
 /**
  * Colors used by ContractR.

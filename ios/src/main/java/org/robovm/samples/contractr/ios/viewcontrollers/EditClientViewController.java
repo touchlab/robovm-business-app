@@ -19,21 +19,24 @@ import org.robovm.apple.uikit.UITextField;
 import org.robovm.objc.annotation.CustomClass;
 import org.robovm.objc.annotation.IBAction;
 import org.robovm.objc.annotation.IBOutlet;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
 import org.robovm.samples.contractr.ios.views.CurrencyTextField;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
+
+import javax.inject.Inject;
 
 /**
  * 
  */
 @CustomClass("EditClientViewController")
 public class EditClientViewController extends InjectedTableViewController {
-    @Inject ClientModel clientModel;
+    @Inject
+    AppManager appManager;
 
-    @IBOutlet UITextField nameTextField;
+    @IBOutlet
+    UITextField nameTextField;
     @IBOutlet
     CurrencyTextField hourlyRateTextField;
 
@@ -41,7 +44,7 @@ public class EditClientViewController extends InjectedTableViewController {
     public void viewWillAppear(boolean animated) {
         super.viewWillAppear(animated);
 
-        Client client = clientModel.getSelectedClient();
+        Client client = appManager.getDatabaseHelper().getSelectedClient();
         if (client == null) {
             getNavigationItem().setTitle("Add client");
             updateViewValuesWithClient(null);
@@ -53,11 +56,11 @@ public class EditClientViewController extends InjectedTableViewController {
 
     @IBAction
     private void save() {
-        Client client = clientModel.getSelectedClient();
+        Client client = appManager.getDatabaseHelper().getSelectedClient();
         if (client == null) {
-            clientModel.save(saveViewValuesToClient(clientModel.create()));
+            appManager.getDatabaseHelper().saveClient(saveViewValuesToClient(new Client()));
         } else {
-            clientModel.save(saveViewValuesToClient(client));
+            appManager.getDatabaseHelper().saveClient(saveViewValuesToClient(client));
         }
         getNavigationController().popViewController(true);
     }
@@ -78,8 +81,8 @@ public class EditClientViewController extends InjectedTableViewController {
     }
 
     private void updateViewValuesWithClient(Client client) {
-        nameTextField.setText(client == null ? "" : client.getName());
-        hourlyRateTextField.setAmount(client == null ? BigDecimal.ZERO : client.getHourlyRate());
+        nameTextField.setText(client == null ? "" : client.name);
+        hourlyRateTextField.setAmount(client == null ? BigDecimal.ZERO : client.hourlyRate);
         nameChanged();
     }
 
@@ -87,8 +90,8 @@ public class EditClientViewController extends InjectedTableViewController {
         String name = nameTextField.getText();
         name = name == null ? "" : name.trim();
 
-        client.setName(name);
-        client.setHourlyRate(hourlyRateTextField.getAmount());
+        client.name = (name);
+        client.hourlyRate = (hourlyRateTextField.getAmount());
 
         return client;
     }

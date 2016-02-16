@@ -15,11 +15,19 @@
  */
 package org.robovm.samples.contractr.ios;
 
-import dagger.Component;
-import org.robovm.samples.contractr.ios.viewcontrollers.*;
+import org.robovm.samples.contractr.ios.viewcontrollers.ClientsViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.EditClientViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.EditTaskViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.ReportsViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.SelectTaskViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.TasksViewController;
+import org.robovm.samples.contractr.ios.viewcontrollers.WorkViewController;
+
+import java.lang.reflect.Method;
 
 import javax.inject.Singleton;
-import java.lang.reflect.Method;
+
+import dagger.Component;
 
 /**
  * Dagger {@link Component}. This needs an {@code inject(...)} for each type of object that will be dependency injected.

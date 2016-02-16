@@ -16,14 +16,15 @@
 package org.robovm.samples.contractr.ios.viewcontrollers;
 
 import org.robovm.apple.foundation.NSIndexPath;
-import org.robovm.apple.uikit.*;
+import org.robovm.apple.uikit.UILabel;
+import org.robovm.apple.uikit.UITableView;
+import org.robovm.apple.uikit.UITableViewCell;
 import org.robovm.objc.annotation.CustomClass;
 import org.robovm.objc.annotation.IBAction;
 import org.robovm.objc.annotation.IBOutlet;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.Task;
-import org.robovm.samples.contractr.core.TaskModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
+import org.robovm.samples.contractr.core.service.Task;
 
 import javax.inject.Inject;
 
@@ -39,8 +40,8 @@ public class SelectTaskViewController extends InjectedTableViewController {
         @IBOutlet UILabel timeElapsedLabel;
     }
 
-    @Inject ClientModel clientModel;
-    @Inject TaskModel taskModel;
+    @Inject
+           AppManager appManager;
 
     @IBAction
     private void cancel() {
@@ -54,13 +55,13 @@ public class SelectTaskViewController extends InjectedTableViewController {
     }
 
     private Task getTaskForRow(NSIndexPath indexPath) {
-        Client client = clientModel.get(indexPath.getSection());
-        return taskModel.getForClient(client, true).get(indexPath.getRow());
+        Client client = appManager.getDatabaseHelper().getClientAt(indexPath.getSection());
+        return appManager.getDatabaseHelper().getTasksForClient(client).get(indexPath.getRow());
     }
 
     @Override
     public void didSelectRow(UITableView tableView, NSIndexPath indexPath) {
-        taskModel.startWork(getTaskForRow(indexPath));
+        appManager.getDatabaseHelper().startWork(getTaskForRow(indexPath));
         dismissViewController(true, null);
     }
 
@@ -68,25 +69,25 @@ public class SelectTaskViewController extends InjectedTableViewController {
     public UITableViewCell getCellForRow(UITableView tableView, NSIndexPath indexPath) {
         SelectTaskCell cell = (SelectTaskCell) tableView.dequeueReusableCell("cell");
         Task task = getTaskForRow(indexPath);
-        cell.titleLabel.setText(task.getTitle());
+        cell.titleLabel.setText(task.title);
         cell.timeElapsedLabel.setText(task.getTimeElapsed());
         return cell;
     }
 
     @Override
     public String getTitleForHeader(UITableView tableView, long section) {
-        Client client = clientModel.get((int) section);
-        return client.getName();
+        Client client = appManager.getDatabaseHelper().getClientAt((int) section);
+        return client.name;
     }
 
     @Override
     public long getNumberOfSections(UITableView tableView) {
-        return clientModel.count();
+        return appManager.getDatabaseHelper().getClientCount();
     }
 
     @Override
     public long getNumberOfRowsInSection(UITableView tableView, long section) {
-        Client client = clientModel.get((int) section);
-        return taskModel.getForClient(client, true).size();
+        Client client = appManager.getDatabaseHelper().getClientAt((int) section);
+        return appManager.getDatabaseHelper().getTasksForClient(client).size();
     }
 }

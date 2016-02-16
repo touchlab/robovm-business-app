@@ -1,6 +1,7 @@
 package org.robovm.samples.contractr.core.common;
 import com.j256.ormlite.db.BaseSqliteDatabaseType;
 import com.j256.ormlite.field.DataPersister;
+import com.j256.ormlite.field.FieldConverter;
 import com.j256.ormlite.field.FieldType;
 import com.j256.ormlite.field.types.DateStringType;
 import com.j256.ormlite.field.types.TimeStampType;
@@ -47,24 +48,16 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType
         appendShortType(sb, fieldType, fieldWidth);
     }
 
-
-   /* @Override
-    public DataPersister getDataPersister(DataPersister defaultPersister, FieldType fieldType) {
-        if (defaultPersister == null) {
-            return super.getDataPersister(defaultPersister, fieldType);
-        }
+    @Override
+    public FieldConverter getFieldConverter(DataPersister dataPersister) {
         // we are only overriding certain types
-        switch (defaultPersister.getSqlType()) {
+        switch (dataPersister.getSqlType()) {
             case DATE :
-                if (defaultPersister instanceof TimeStampType) {
-                    return TimeStampStringType.getSingleton();
-                } else {
-                    return DateStringType.getSingleton();
-                }
+                return DateStringType.getSingleton();
             default :
-                return super.getDataPersister(defaultPersister, fieldType);
+                return super.getFieldConverter(dataPersister);
         }
-    }*/
+    }
 
     @Override
     public boolean isNestedSavePointsSupported() {
@@ -76,10 +69,9 @@ public class SqliteAndroidDatabaseType extends BaseSqliteDatabaseType
         return true;
     }
 
-    /*@Override
+    @Override
     public <T> DatabaseTableConfig<T> extractDatabaseTableConfig(ConnectionSource connectionSource, Class<T> clazz)
-            throws SQLException
-    {
+            throws SQLException {
         return DatabaseTableConfigUtil.fromClass(connectionSource, clazz);
-    }*/
+    }
 }

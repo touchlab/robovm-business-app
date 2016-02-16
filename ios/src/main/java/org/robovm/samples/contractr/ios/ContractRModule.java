@@ -15,23 +15,22 @@
  */
 package org.robovm.samples.contractr.ios;
 
-import dagger.Module;
-import dagger.Provides;
-import org.robovm.apple.foundation.Foundation;
-import org.robovm.samples.contractr.core.ClientModel;
-import org.robovm.samples.contractr.core.TaskModel;
-import org.robovm.samples.contractr.core.service.ConnectionPool;
-import org.robovm.samples.contractr.core.service.SingletonConnectionPool;
-import org.robovm.samples.contractr.core.service.TaskManager;
+import org.robovm.samples.contractr.core.common.RoboVMContext;
+import org.robovm.samples.contractr.core.service.AppManager;
+
+import java.io.File;
 
 import javax.inject.Singleton;
-import java.io.File;
+
+import dagger.Module;
+import dagger.Provides;
 
 /**
  * Dagger {@link Module} that configures the iOS version of the ContractR app.
  */
 @Module
-public class ContractRModule {
+public class ContractRModule
+{
 
     /**
      * Whether dummy data should be preloaded into new databases.
@@ -40,6 +39,28 @@ public class ContractRModule {
 
     @Provides
     @Singleton
+    public RoboVMContext provideRoboVMContext()
+    {
+        try {
+            Class.forName("SQLite.JDBCDriver");
+        } catch (ClassNotFoundException e) {
+            throw new Error(e);
+        }
+
+        return new RoboVMContext(false, new File(System.getenv("HOME")));
+    }
+
+    @Provides
+    @Singleton
+    public AppManager provideAppManager(RoboVMContext roboVMContext)
+    {
+        return new AppManager(roboVMContext);
+    }
+
+
+
+  /*  @Provides
+    @Singleton
     public ConnectionPool proivdeConnectionPool() {
         try {
             Class.forName("SQLite.JDBCDriver");
@@ -47,23 +68,23 @@ public class ContractRModule {
             throw new Error(e);
         }
 
-        /*
+        *//*
          * The SQLite database is kept in
          * <Application_Home>/Documents/db.sqlite. This directory is backed up
          * by iTunes. See http://goo.gl/BWlCGN for Apple's docs on the iOS file
          * system.
-         */
+         *//*
         File dbFile = new File(System.getenv("HOME"), "Documents/db.sqlite");
         dbFile.getParentFile().mkdirs();
         Foundation.log("Using db in file: " + dbFile.getAbsolutePath());
 
         return new SingletonConnectionPool(
                 "jdbc:sqlite:" + dbFile.getAbsolutePath());
-    }
+    }*/
 
-    @Provides
+    /*@Provides
     @Singleton
-    public ClientManager proivdeClientManager(ConnectionPool connectionPool) {
+    public AppManager proivdeAppManager(ConnectionPool connectionPool) {
         return new JdbcClientManager(connectionPool, PRELOAD_DATA);
     }
 
@@ -86,5 +107,5 @@ public class ContractRModule {
     @Singleton
     public TaskModel proivdeTaskModel(ClientModel clientModel, TaskManager taskManager) {
         return new TaskModel(clientModel, taskManager);
-    }
+    }*/
 }

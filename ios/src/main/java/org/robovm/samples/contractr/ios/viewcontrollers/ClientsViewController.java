@@ -24,8 +24,8 @@ import org.robovm.apple.uikit.UITableViewCellAccessoryType;
 import org.robovm.apple.uikit.UITableViewCellStyle;
 import org.robovm.apple.uikit.UITableViewRowAnimation;
 import org.robovm.objc.annotation.CustomClass;
-import org.robovm.samples.contractr.core.Client;
-import org.robovm.samples.contractr.core.ClientModel;
+import org.robovm.samples.contractr.core.service.AppManager;
+import org.robovm.samples.contractr.core.service.Client;
 
 import javax.inject.Inject;
 
@@ -35,7 +35,8 @@ import javax.inject.Inject;
 @CustomClass("ClientsViewController")
 public class ClientsViewController extends ListViewController {
 
-    @Inject ClientModel clientModel;
+    @Inject
+    AppManager appManager;
 
     @Override
     public void viewDidLoad() {
@@ -46,20 +47,20 @@ public class ClientsViewController extends ListViewController {
 
     @Override
     protected void onAdd() {
-        clientModel.selectClient(null);
+        appManager.getDatabaseHelper().selectClient(null);
         performSegue("editClientSegue", this);
     }
 
     @Override
     protected void onEdit(int section, int row) {
-        clientModel.selectClient(clientModel.get(row));
+        appManager.getDatabaseHelper().selectClient(appManager.getDatabaseHelper().getClientAt(row));
         performSegue("editClientSegue", this);
     }
 
     @Override
     protected void onDelete(int section, int row) {
-        Client client = clientModel.get(row);
-        clientModel.delete(client);
+        Client client = appManager.getDatabaseHelper().getClientAt(row);
+        appManager.getDatabaseHelper().delete(client);
         getTableView().deleteRows(
                 new NSArray<>(NSIndexPathExtensions.createIndexPathForRowInSection(row, section)),
                 UITableViewRowAnimation.Automatic);
@@ -72,13 +73,13 @@ public class ClientsViewController extends ListViewController {
             cell = new UITableViewCell(UITableViewCellStyle.Value1, "cell");
             cell.setAccessoryType(UITableViewCellAccessoryType.DisclosureIndicator);
         }
-        Client client = clientModel.get((int) indexPath.getRow());
-        cell.getTextLabel().setText(client.getName());
+        Client client = appManager.getDatabaseHelper().getClientAt(indexPath.getRow());
+        cell.getTextLabel().setText(client.name);
         return cell;
     }
 
     @Override
     public long getNumberOfRowsInSection(UITableView tableView, long section) {
-        return clientModel.count();
+        return appManager.getDatabaseHelper().getClientCount();
     }
 }
