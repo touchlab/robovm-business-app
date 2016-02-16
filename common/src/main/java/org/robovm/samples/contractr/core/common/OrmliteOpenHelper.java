@@ -15,8 +15,6 @@ import java.sql.SQLException;
  */
 public abstract class OrmliteOpenHelper extends RoboSqliteOpenHelper {
 
-    protected boolean cancelQueriesEnabled;
-
     public OrmliteOpenHelper(RoboVMContext context, String databaseName, int databaseVersion)
     {
         super(context, databaseName, databaseVersion);

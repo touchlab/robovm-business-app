@@ -1,22 +1,23 @@
 # RoboVM ContractR sample (updated)
 
-Sample app for robovm. It seemed really complex to me, and I wanted to try something with Ormlite and code style
-similar to how we build android apps internally. Turns out the jdbc driver for robo doesn't implement setObject,
-so there's work to be done on OrmLite. I did a basic version, but it still needs work.
+Sample app for robovm. Place to code and test ORMlite support, and eventually add more libs for
+RoboVM.
 
-Will be adding more stuff in the future. I'd like to build a reference app. I'd like to maybe move away from the bus
-communication.  See how it goes. Ideally as much logic is put in shared code.
+## ORMLite
 
-## iOS app
+Its complete-ish. The trouble revolves around support in the jdbc drivers. There's a driver that's used
+in the core unit tests, and different drivers for android and iOS. They all support a different subset
+of features. Thankfully the iOS driver crashes when it doesn't support a method. The android one does
+not, which is upsetting.
 
-The iOS app is built using native UI components and APIs available through the
-Cocoa bindings in RoboVM. This project depends on the core project which holds
-all domain objects and services for managing clients, tasks and the work
-performed.
+Anyway, ORMLite support should be pretty solid, but its brand new, so some types may be iffy.
 
-### THE IOS APP IS CURRENTLY BROKEN!!!
+## RoboSqliteOpenHelper
 
-## Android app
+Android's db management scheme is kind of weird, but we're pretty used to it, so I'm replicating that here.
+You supply the context, name, and version, and it'll manage upgrades.
 
-The Android app is built using standard Android components such as view XMLs,
-Fragments and ActionBar.
+## RoboVMContext
+
+Providing some similar functionality to Android's Context. This is likely to change, but one thing
+at a time.
